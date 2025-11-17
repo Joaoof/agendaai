@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { createClient } from "@/lib/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner"
 
 interface UserPreferences {
   theme: string;
@@ -28,7 +28,6 @@ export function SettingsContent() {
     default_task_duration: 60
   });
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
   const supabase = createClient();
 
   useEffect(() => {
@@ -66,16 +65,9 @@ export function SettingsContent() {
     setLoading(false);
 
     if (error) {
-      toast({
-        title: "Erro ao salvar",
-        description: "Não foi possível salvar as configurações.",
-        variant: "destructive"
-      });
+      toast.error("Erro ao salvar configurações");
     } else {
-      toast({
-        title: "Configurações salvas",
-        description: "Suas preferências foram atualizadas com sucesso."
-      });
+      toast.success("Configurações salvas");
     }
   };
 
@@ -104,9 +96,9 @@ export function SettingsContent() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="theme">Tema</Label>
-                <Select 
+                <Select
                   value={preferences.theme}
-                  onValueChange={(value) => setPreferences({...preferences, theme: value})}
+                  onValueChange={(value) => setPreferences({ ...preferences, theme: value })}
                 >
                   <SelectTrigger id="theme">
                     <SelectValue placeholder="Selecione o tema" />
@@ -136,8 +128,8 @@ export function SettingsContent() {
                 </div>
                 <Switch
                   checked={preferences.notifications_enabled}
-                  onCheckedChange={(checked) => 
-                    setPreferences({...preferences, notifications_enabled: checked})
+                  onCheckedChange={(checked) =>
+                    setPreferences({ ...preferences, notifications_enabled: checked })
                   }
                 />
               </div>
@@ -159,8 +151,8 @@ export function SettingsContent() {
                     id="work-start"
                     type="time"
                     value={preferences.work_hours_start}
-                    onChange={(e) => 
-                      setPreferences({...preferences, work_hours_start: e.target.value})
+                    onChange={(e) =>
+                      setPreferences({ ...preferences, work_hours_start: e.target.value })
                     }
                   />
                 </div>
@@ -170,8 +162,8 @@ export function SettingsContent() {
                     id="work-end"
                     type="time"
                     value={preferences.work_hours_end}
-                    onChange={(e) => 
-                      setPreferences({...preferences, work_hours_end: e.target.value})
+                    onChange={(e) =>
+                      setPreferences({ ...preferences, work_hours_end: e.target.value })
                     }
                   />
                 </div>
@@ -198,8 +190,8 @@ export function SettingsContent() {
                   min="15"
                   step="15"
                   value={preferences.default_task_duration}
-                  onChange={(e) => 
-                    setPreferences({...preferences, default_task_duration: parseInt(e.target.value)})
+                  onChange={(e) =>
+                    setPreferences({ ...preferences, default_task_duration: parseInt(e.target.value) })
                   }
                 />
                 <p className="text-sm text-muted-foreground">

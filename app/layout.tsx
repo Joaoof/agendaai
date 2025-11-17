@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: 'Agenda Completa - Sistema de Gestão de Tarefas',
   description: 'Sistema completo de agendamento e gestão de tarefas',
   generator: 'v0.app',
-  icons: {
+  icons: {  
     icon: [
       {
         url: '/icon-light-32x32.png',

@@ -11,7 +11,7 @@ import { Sidebar } from "@/components/sidebar";
 import { WeekView } from "@/components/week-view";
 import { KanbanView } from "@/components/kanban-view";
 
-interface Task {
+type Task = {
   id: string;
   title: string;
   description: string | null;
@@ -19,6 +19,15 @@ interface Task {
   end_time: string;
   color: string;
   user_id: string;
+  completed: boolean;
+  completed_at: string | null;
+  category: string;
+  priority: string;
+};
+
+interface WeekViewProps {
+  tasks: Task[];
+  onTasksChange: () => void;
 }
 
 export default function Calendar() {
@@ -46,7 +55,14 @@ export default function Calendar() {
       return;
     }
 
-    setTasks(data || []);
+    // Map data to ensure category and priority have default values
+    const mappedTasks = (data || []).map((task) => ({
+      ...task,
+      category: task.category || "geral",
+      priority: task.priority || "media",
+    }));
+
+    setTasks(mappedTasks);
   };
 
   const handleLogout = async () => {
@@ -123,7 +139,7 @@ export default function Calendar() {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar viewMode={viewMode} onViewModeChange={setViewMode} />
-      
+
       <div className="flex-1 overflow-hidden">
         {viewMode === 'week' ? (
           <WeekView tasks={tasks} onTasksChange={loadTasks} />
