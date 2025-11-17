@@ -1,12 +1,12 @@
-// joaoof/agendaai/agendaai-4fc6770d529a9cd71025793dd63d9a7825895368/components/pomodoro-timer.tsx (Novo Código)
+// joaoof/agendaai/agendaai-4fc6770d529a9cd71025793dd63d9a7825895368/components/pomodoro-timer.tsx
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, PauseCircle, RotateCcw, Clock, CheckCircle2 } from 'lucide-react';
 import { createClient } from "@/lib/supabase/client";
-import { Badge } from "@/components/ui/badge"; // Adicionado Badge para o contador
+import { Badge } from "@/components/ui/badge";
 
 interface Task {
     id: string;
@@ -16,17 +16,47 @@ interface Task {
 interface PomodoroTimerProps {
     activeTask: Task | null;
     onSessionComplete: () => void;
+    onPreviewSound: () => void;
 }
 
 const POMODORO_DURATIONS = {
     FOCUS: 25 * 60, // 25 minutes in seconds
-    SHORT_BREAK: 5 * 60,   // 5 minutes
-    LONG_BREAK: 15 * 60,  // 15 minutes
+    SHORT_BREAK: 5 * 60,   // 5 minutes
+    LONG_BREAK: 15 * 60,  // 15 minutes
 };
 
 type SessionType = 'focus' | 'short-break' | 'long-break';
 
-export function PomodoroTimer({ activeTask, onSessionComplete }: PomodoroTimerProps) {
+// Componente de áudio simplificado para MP3, usando a prop `src` diretamente
+const AlarmAudio = () => {
+    return (
+        <audio
+            id="pomodoro-alarm"
+            src="/alarm.mp3"
+            preload="auto"
+        >
+            Seu navegador não suporta o elemento de áudio ou o arquivo alarm.mp3 não foi encontrado.
+        </audio>
+    );
+}
+
+// Função para tocar o alarme, com tratamento de erro e aviso de arquivo ausente
+const playAlarm = () => {
+    const audio = document.getElementById('pomodoro-alarm') as HTMLAudioElement;
+    if (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.play().catch(error => {
+            if (error.name === 'NotSupportedError' || audio.networkState === audio.NETWORK_NO_SOURCE) {
+                console.error("ERRO CRÍTICO (Pomodoro): O arquivo de áudio /alarm.mp3 não foi encontrado ou não é suportado. Você precisa adicionar o arquivo de toque MP3 na pasta 'public'.");
+            } else {
+                console.error("Erro ao tentar reproduzir o áudio (pode ser política de autoplay):", error);
+            }
+        });
+    }
+}
+
+export function PomodoroTimer({ activeTask, onSessionComplete, onPreviewSound }: PomodoroTimerProps) {
     const [sessionType, setSessionType] = useState<SessionType>('focus');
     const [timeLeft, setTimeLeft] = useState(POMODORO_DURATIONS.FOCUS);
     const [isActive, setIsActive] = useState(false);
@@ -36,6 +66,10 @@ export function PomodoroTimer({ activeTask, onSessionComplete }: PomodoroTimerPr
     const resetTimer = useCallback((type: SessionType = 'focus') => {
         setSessionType(type);
         setIsActive(false);
+        // Garante que o timer do navegador pare ao resetar
+        const audio = document.getElementById('pomodoro-alarm') as HTMLAudioElement;
+        if (audio) audio.pause();
+
         switch (type) {
             case 'focus':
                 setTimeLeft(POMODORO_DURATIONS.FOCUS);
@@ -96,6 +130,7 @@ export function PomodoroTimer({ activeTask, onSessionComplete }: PomodoroTimerPr
 
     const handleTimerEnd = async () => {
         setIsActive(false);
+        playAlarm();
 
         if (sessionType === 'focus') {
             await saveSession('focus');
@@ -187,6 +222,7 @@ export function PomodoroTimer({ activeTask, onSessionComplete }: PomodoroTimerPr
 
             {/* TIMER DISPLAY */}
             <div className="relative">
+                <AlarmAudio />
                 <div className={`text-8xl font-mono font-extrabold ${text} transition-colors duration-500`}>
                     {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
                 </div>
@@ -197,35 +233,48 @@ export function PomodoroTimer({ activeTask, onSessionComplete }: PomodoroTimerPr
                 )}
             </div>
 
-            {/* CONTROLS */}
+            {/* CONTROLS - Implementação de botões separados */}
             <div className="flex gap-4 w-full justify-center">
-                <Button
-                    onClick={toggleTimer}
-                    disabled={primaryActionDisabled}
-                    className={`text-white ${bg} ${hover} shadow-lg ${primaryActionDisabled ? 'opacity-50 cursor-not-allowed' : 'shadow-lg shadow-purple-500/30'}`}
-                    size="lg"
-                >
-                    {isActive ? (
-                        <PauseCircle className="h-5 w-5" />
-                    ) : (
-                        <PlayCircle className="h-5 w-5" />
-                    )}
-                    {isActive ? 'PAUSAR' : 'INICIAR'}
-                </Button>
+
+                {/* Botão de INICIAR (Só aparece se o timer NÃO estiver ativo) */}
+                {!isActive && (
+                    <Button
+                        onClick={toggleTimer}
+                        disabled={primaryActionDisabled}
+                        className={`text-white ${bg} ${hover} shadow-lg ${primaryActionDisabled ? 'opacity-50 cursor-not-allowed' : 'shadow-lg shadow-purple-500/30'}`}
+                        size="lg"
+                    >
+                        <PlayCircle className="h-5 w-5 mr-2" />
+                        INICIAR
+                    </Button>
+                )}
+
+                {/* Botão de PAUSAR (Só aparece se o timer ESTIVER ativo) */}
+                {isActive && (
+                    <Button
+                        onClick={toggleTimer}
+                        className="bg-slate-500 hover:bg-slate-600 text-white shadow-lg shadow-slate-500/30"
+                        size="lg"
+                    >
+                        <PauseCircle className="h-5 w-5 mr-2" />
+                        PAUSAR
+                    </Button>
+                )}
+
+                {/* Botão de Resetar (Sempre visível) */}
                 <Button
                     variant="outline"
                     onClick={handleReset}
                     size="lg"
                     className="border-input hover:bg-accent"
                 >
-                    <RotateCcw className="h-4 w-4" />
+                    <RotateCcw className="h-4 w-4 mr-2" />
                     Resetar
                 </Button>
             </div>
 
             {/* SESSION TYPES TABS */}
             <div className="flex gap-2 pt-4 border-t border-border w-full justify-center">
-                {/* Use classes de estilo condicional para indicar o tipo ativo */}
                 {([
                     { type: 'focus', label: 'Foco (25m)', duration: POMODORO_DURATIONS.FOCUS / 60 },
                     { type: 'short-break', label: 'Pausa Curta (5m)', duration: POMODORO_DURATIONS.SHORT_BREAK / 60 },
@@ -245,3 +294,5 @@ export function PomodoroTimer({ activeTask, onSessionComplete }: PomodoroTimerPr
         </div>
     );
 }
+
+export { AlarmAudio, playAlarm };

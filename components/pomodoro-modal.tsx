@@ -8,10 +8,13 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogDescription // Adicionado para dar mais contexto ao modal
+    DialogDescription
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button"; // Importar Button
+import { Volume2 } from "lucide-react"; // Importar Volume2
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PomodoroTimer } from "./pomodoro-timer";
+// NOVO: Importa os utilitários de áudio
+import { PomodoroTimer, AlarmAudio, playAlarm } from "./pomodoro-timer";
 import { createClient } from "@/lib/supabase/client";
 
 interface Task {
@@ -67,11 +70,30 @@ export function PomodoroModal({ open, onOpenChange, onSessionComplete }: Pomodor
 
     const activeTask = tasks.find(t => t.id === selectedTaskId) || null;
 
+    // NOVO: Função de preview que chama a função utilitária
+    const handlePreviewSound = () => {
+        playAlarm();
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[480px]">
+                {/* NOVO: Inclui o elemento de áudio aqui para ser carregado com o modal */}
+                <AlarmAudio />
+
                 <DialogHeader>
-                    <DialogTitle>🧠 Relógio Pomodoro</DialogTitle>
+                    <div className="flex items-center justify-between pr-8">
+                        <DialogTitle>🧠 Relógio Pomodoro</DialogTitle>
+                        {/* NOVO: Botão de preview */}
+                        <Button
+                            variant="outline"
+                            size="icon-sm"
+                            onClick={handlePreviewSound}
+                            title="Pré-visualizar toque"
+                        >
+                            <Volume2 className="h-4 w-4" />
+                        </Button>
+                    </div>
                     <DialogDescription>
                         Selecione uma tarefa para focar e inicie o ciclo.
                     </DialogDescription>
@@ -81,7 +103,6 @@ export function PomodoroModal({ open, onOpenChange, onSessionComplete }: Pomodor
                     <Select
                         value={selectedTaskId || ''}
                         onValueChange={setSelectedTaskId}
-                    // Adicionado placeholder para o SelectValue
                     >
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Selecione a Tarefa para Focar" />
@@ -105,6 +126,7 @@ export function PomodoroModal({ open, onOpenChange, onSessionComplete }: Pomodor
                 <PomodoroTimer
                     activeTask={activeTask}
                     onSessionComplete={onSessionComplete}
+                    onPreviewSound={handlePreviewSound}
                 />
 
             </DialogContent>
