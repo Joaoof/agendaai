@@ -153,10 +153,10 @@ export function DashboardContent() {
   ];
 
   const StatCard = ({ icon: Icon, title, value, description, trend }: any) => (
-    <Card className="border-0 shadow-sm bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 hover:shadow-md transition-shadow duration-300">
+    <Card className="border-0 shadow-sm bg-linear-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 hover:shadow-md transition-shadow duration-300">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
         <CardTitle className="text-sm font-semibold text-slate-700 dark:text-slate-300">{title}</CardTitle>
-        <div className="p-2.5 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg text-white shadow-lg">
+        <div className="p-2.5 bg-linear-to-br from-purple-500 to-blue-500 rounded-lg text-white shadow-lg">
           <Icon className="h-4 w-4" />
         </div>
       </CardHeader>

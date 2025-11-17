@@ -84,7 +84,7 @@ export function WeekView({ tasks, onTasksChange }: WeekViewProps) {
     return tasks.filter((task) => {
       const taskDate = new Date(task.start_time);
       const taskHour = taskDate.getHours() + taskDate.getMinutes() / 60;
-      
+
       return (
         taskDate.getDate() === date.getDate() &&
         taskDate.getMonth() === date.getMonth() &&
@@ -123,7 +123,7 @@ export function WeekView({ tasks, onTasksChange }: WeekViewProps) {
   const handleTaskComplete = async (task: Task, e: React.MouseEvent) => {
     e.stopPropagation();
     const newCompleted = !task.completed;
-    
+
     const { error } = await supabase
       .from("tasks")
       .update({
@@ -196,7 +196,7 @@ export function WeekView({ tasks, onTasksChange }: WeekViewProps) {
                     return (
                       <td
                         key={dayIndex}
-                        className="border border-border bg-background p-2 cursor-pointer hover:bg-accent/50 transition-colors align-top min-h-[80px]"
+                        className="border border-border bg-background p-2 cursor-pointer hover:bg-accent/50 transition-colors align-top min-h-20"
                         onClick={() => handleCellClick(date, slot)}
                       >
                         <div className="space-y-1">
@@ -210,7 +210,7 @@ export function WeekView({ tasks, onTasksChange }: WeekViewProps) {
                               <div className="flex items-start gap-1.5">
                                 <Checkbox
                                   checked={task.completed}
-                                  onCheckedChange={() => {}}
+                                  onCheckedChange={() => { }}
                                   onClick={(e) => handleTaskComplete(task, e)}
                                   className="mt-0.5 h-3 w-3 border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
                                 />
@@ -221,7 +221,7 @@ export function WeekView({ tasks, onTasksChange }: WeekViewProps) {
                                     </span>
                                     <button
                                       onClick={(e) => handleTaskDelete(task.id, e)}
-                                      className="opacity-0 group-hover:opacity-100 text-white hover:text-red-200 transition-opacity flex-shrink-0"
+                                      className="opacity-0 group-hover:opacity-100 text-white hover:text-red-200 transition-opacity shrink-0"
                                     >
                                       ×
                                     </button>
